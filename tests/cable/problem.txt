@@ -1,0 +1,62 @@
+Problem Statement
+The computer systems of N employees of a company are arranged in a row. A technical fault in the power supply has caused some of the systems to turn OFF while the others remain ON.
+
+Because of this, the employees whose systems are OFF are unable to work. The company does not like to see its employees sitting idle. So until the technical team can find the actual cause of the breakdown, the technical head Adam has devised a temporary workaround for the OFF systems at a minimum cost.
+
+Adam decides to connect all the OFF systems to the nearest ON system with the shortest possible length of cable. To make this happen, he calculates the distance of each system from the first system.
+
+Write an algorithm to help Adam find the minimum length of cable he needs to turn all the systems ON.
+
+Input
+The first line of the input consists of an integer systemState_size, representing the number of systems (N).
+
+The second line consists of N space-separated integers:
+systemState[1], systemState[2], ..., systemState[N],
+representing the initial state of each system: ON (1) or OFF (0).
+
+The third line consists of an integer dist_size, representing the number of distances (M).
+
+The last line consists of M space-separated integers:
+dist[1], dist[2], ..., dist[M],
+representing the distance of each system from the first system.
+
+Output
+Print an integer representing the minimum length of cable Adam needs to turn all the systems ON.
+If no cable is needed, then print 0.
+
+Constraints
+1 ≤ systemState_size, dist_size ≤ 10⁵
+
+1 ≤ dist[i] ≤ 10⁹
+
+1 ≤ i ≤ dist_size
+
+Note
+It is guaranteed that at least one system is ON
+
+None of the systems are faulty.
+
+Example
+Input:
+
+Copy
+Edit
+3
+1 0 0
+3
+1 5 6
+Output:
+
+Copy
+Edit
+5
+Explanation:
+
+Length of cable required to connect the 2nd system (OFF) to the 1st system (ON) = |5 - 1| = 4
+
+Length of cable required to connect the 3rd system (OFF) to the 2nd system (OFF) is invalid (cannot connect to another OFF), so we go back to the 1st ON system = |6 - 1| = 5
+
+Total = 4 + 5 = 9
+However, if the 2nd system connects to 1st system (4) and 3rd system connects directly to 2nd system which now is ON → total becomes 5.
+
+(Assuming only one connection per OFF to nearest ON; so the 3rd system finds 2nd system as ON now — implementation specifics will affect actual routing logic.)
