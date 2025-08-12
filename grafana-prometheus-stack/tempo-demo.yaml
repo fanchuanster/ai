@@ -144,19 +144,29 @@ spec:
         - name: hotrod
           image: jaegertracing/example-hotrod:latest
           env:
-            # Send traces via OTLP/gRPC directly to Tempo
+            # ---- OpenTelemetry → Tempo (OTLP/gRPC) ----
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: "grpc"
+            # Use generic endpoint (read by most SDKs) AND traces-specific, both with scheme
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://tempo.tracing.svc.cluster.local:4317"
+            - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+              value: "grpc"
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.tracing.svc.cluster.local:4317"
+              value: "http://tempo.tracing.svc.cluster.local:4317"
             - name: OTEL_EXPORTER_OTLP_INSECURE
               value: "true"
-            # Optional: set a service name resource (helpful in Grafana search)
+            - name: OTEL_EXPORTER_OTLP_TRACES_INSECURE
+              value: "true"
+
+            # Do NOT set OTEL_SERVICE_NAME for HotROD; it already emits multiple service names.
+            # If you previously set it, blank it out:
             - name: OTEL_SERVICE_NAME
-              value: "hotrod"
-            # Ensure old Jaeger envs don’t interfere
+              value: ""
+
+            # Ensure old Jaeger envs can't override anything
             - name: JAEGER_ENDPOINT
               value: ""
             - name: JAEGER_AGENT_HOST
