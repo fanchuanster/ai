@@ -30,8 +30,9 @@ data:
     server:
       http_listen_port: 3200
 
-    search_enabled: true
-    
+    search: 
+      enabled: true
+
     distributor:
       receivers:
         jaeger:
@@ -82,7 +83,7 @@ spec:
               mountPath: /var/tempo
       containers:
         - name: tempo
-          image: grafana/tempo:latest
+          image: grafana/tempo:2.8.2
           args: ["-config.file=/etc/tempo/tempo.yaml"]
           ports:
             - containerPort: 3200   # HTTP API
