@@ -56,7 +56,7 @@ alloy:
         }
       }
 
-  # Optional: Switch to Deployment (single instance)
+  # Optional: Switch from DaemonSet to Deployment (single instance)
   controller:
     kind: Deployment
     replicas: 1
