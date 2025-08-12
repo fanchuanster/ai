@@ -1,0 +1,6 @@
+groups:
+- name: cpu.rules
+  interval: 30s
+  rules:
+    - record: instance:cpu:rate5m
+      expr: rate(node_cpu_seconds_total{mode!="idle"}[5m])

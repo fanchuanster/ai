@@ -1,0 +1,35 @@
+deploymentMode: SingleBinary
+loki:
+  auth_enabled: false
+  commonConfig:
+    replication_factor: 1
+  storage:
+    type: filesystem
+  schemaConfig:
+    configs:
+      - from: 2024-04-01
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index:
+          prefix: loki_index_
+          period: 24h
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: true
+    # storageClass: gp3 # use default cluster storageClass
+    size: 10Gi  # Adjust size as needed
+    accessModes:
+      - ReadWriteOnce
+write:
+  replicas: 0
+read:
+  replicas: 0
+backend:
+  replicas: 0
+
+
+# helm upgrade --install loki grafana/loki --namespace loki --create-namespace --values loki-values.yaml
+
+# Data source successfully connected. with http://loki-gateway.loki.svc.cluster.local

@@ -1,0 +1,67 @@
+server:
+  log_level: info
+
+metrics:
+  receivers:
+    # Scrape metrics from a Flask app
+    prometheus_scrape:
+      targets:
+        - url: http://localhost:8000/metrics
+          labels:
+            job: flask_app
+            env: prod
+  exporters:
+    # Remote write to Grafana Cloud, Mimir, or Prometheus backend
+    prometheus_remote_write:
+      endpoint: https://your-mimir.example.com/api/v1/push
+      headers:
+        Authorization: Bearer $BEARER_TOKEN
+
+logs:
+  receivers:
+    # Tail logs from your Flask app or service
+    filelog:
+      include:
+        - /var/log/flask_app.log
+      labels:
+        job: flask_app
+        env: prod
+      operators:
+        - type: regex
+          regex: 'level=(?P<level>\w+) msg="(?P<msg>[^"]+)"'
+          name: parse_fields
+
+  exporters:
+    # Push logs to Grafana Loki
+    loki:
+      endpoint: http://loki:3100/loki/api/v1/push
+
+traces:
+  receivers:
+    # Receive OpenTelemetry trace data via OTLP (gRPC or HTTP)
+    otlp:
+      protocols:
+        grpc:
+        http:
+
+  exporters:
+    # Push to Grafana Tempo or any OTLP-compatible backend
+    tempo:
+      endpoint: tempo:4317  # Replace with real address
+      tls:
+        insecure_skip_verify: true
+
+service:
+  # Tie everything together
+  pipelines:
+    metrics:
+      receivers: [prometheus_scrape]
+      exporters: [prometheus_remote_write]
+
+    logs:
+      receivers: [filelog]
+      exporters: [loki]
+
+    traces:
+      receivers: [otlp]
+      exporters: [tempo]

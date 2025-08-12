@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  db-pwd: bXlwd2QxMjM=
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: my-dbpwd

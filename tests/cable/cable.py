@@ -1,4 +1,8 @@
 import math
+from collections import Counter
+from itertools import permutations, combinations, chain
+import heapq
+from collections import deque, defaultdict,
 def min_cable(states, dists):
 
     dist_states = zip(dists, states)

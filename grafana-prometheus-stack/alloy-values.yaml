@@ -1,0 +1,32 @@
+# helm upgrade --install alloy grafana/alloy \
+#   -n alloy --create-namespace \
+#   -f alloy-values.yaml
+
+alloy:
+  mounts:
+    varlog: true
+    dockercontainers: true
+
+  configMap:
+    create: true
+    content: |
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+
+      local.file_match "k8s_logs" {
+        path_targets = [
+          { __path__ = "/var/log/containers/*.log", job = "kubernetes-pods" },
+        ]
+      }
+
+      loki.source.file "k8s_logs" {
+        targets    = local.file_match.k8s_logs.targets
+        forward_to = [loki.write.default.receiver]
+      }
+
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
+        }
+      }

@@ -1,0 +1,12 @@
+groups:
+- name: alert.rules
+  rules:
+    - alert: CPUUsageHigh
+      expr: instance:cpu:rate5m > 0.8
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: High CPU usage on {{ $labels.instance }}
+        description: |
+          CPU usage has been above 80% for over 2 minutes.

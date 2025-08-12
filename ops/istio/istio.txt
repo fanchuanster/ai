@@ -1,0 +1,40 @@
+https://istio.io/latest/docs/ambient/getting-started/
+
+service mesh implementation Istio
+L4 - mTLS, authorization (zero trust, least privilege), connect (timeout, retry)
+L7 - traffic split, authorization (header, path based)
+sidecar mode - old, envoy proxy container injected to each pod, virtualservice and destinationrule for traffic split
+ambient mode - 2022, new, sidecar-less, use Kubernetes Gateway API for traffic split - HTTPRoute. Gateway API, new Ingress replacement
+    ztunnel (deamonset) + waypoint (proxy per namespace)
+
+for i in {1..50}; do curl -s http://localhost:5010/productpage | grep reviews-v; done
+
+istioctl proxy-config route productpage-v1-78dfd4688c-2qwtm -n default --name http
+
+istioctl x describe pod productpage-v1-78dfd4688c-qnl5c -n default
+
+Ensure Waypoints Are Deployed
+istioctl x waypoint apply --namespace my-namespace --service-account my-sa
+or apply a namespace-wide waypoint:
+istioctl x waypoint apply --namespace my-namespace
+
+
+kubectl port-forward -n istio-system svc/kiali --address 0.0.0.0 5011:20001
+
+
+# install tempo and it creates servcie like tempo.tempo.svc.cluster.local:4317
+helm repo add grafana https://grafana.github.io/helm-charts
+helm install tempo grafana/tempo \
+  --namespace tempo --create-namespace \
+  --set traces.otlp.grpc.enabled=true \
+  --set traces.otlp.grpc.listenAddress=0.0.0.0:4317
+# configure istio to export traces
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  meshConfig:
+    defaultConfig:
+      tracing:
+        sampling: 100.0
+        openCensusAgent:
+          address: tempo.tempo.svc.cluster.local:4317

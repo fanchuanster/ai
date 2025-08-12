@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  db-pwd: bXlwd2QxMjM=
+kind: Secret
+metadata:
+  creationTimestamp: "2025-08-04T04:20:48Z"
+  name: my-dbpwd
+  namespace: default
+  ownerReferences:
+  - apiVersion: bitnami.com/v1alpha1
+    controller: true
+    kind: SealedSecret
+    name: my-dbpwd
+    uid: 7abfd3bc-0901-4151-8641-8a27c7ec8d7b
+  resourceVersion: "59736060"
+  uid: 082d1ec0-c893-4f16-b592-5e8ac4b85f6c
+type: Opaque

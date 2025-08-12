@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: guestbook
+  namespace: argocd
+spec:
+  project: project1
+  source:
+    repoURL: https://github.com/fanchuanster/argocd-example-apps.git
+    targetRevision: HEAD
+    path: helm-guestbook
+    helm: 
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: ns1
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true  # automatically create ns if it does not exist

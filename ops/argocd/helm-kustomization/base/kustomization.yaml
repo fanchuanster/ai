@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: my-namespace
+
+helmCharts:
+  - name: my-chart
+    repo: https://charts.example.com
+    version: 1.2.3
+    releaseName: my-app
+    valuesFile: my-values.yaml  # override the entire valuesFile, use valuesInline for partial override.
+    namespace: my-namespace
+
+# optional in base
+resources:
+  - deployment-patch.yaml  # Kustomize patch applied AFTER Helm rendering
+
+commonLabels:
+  environment: staging
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: my-container
+    newTag: "2.0.0"  # Overrides image tag in post-helm if defined in Helm chart output.

@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: shared-gateway
+  namespace: istio-ingress  # Must match the parentRef in your HTTPRoute
+spec:
+  gatewayClassName: istio  # Or 'istio' if using Istio, 'envoy-gateway' if using Envoy Gateway, etc.
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP
+      hostname: "*.example.com"  # Accepts app-b.example.com
+      allowedRoutes:
+        namespaces:
+          from: All  # Allows routes from any namespace to bind
+
+# shared by apps

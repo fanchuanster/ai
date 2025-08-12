@@ -1,0 +1,37 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: helm-multi-env
+spec:
+  generators:
+    - list:
+        elements:
+          - env: dev
+            namespace: dev
+            replicaCount: 1
+          - env: staging
+            namespace: staging
+            replicaCount: 2
+          - env: prod
+            namespace: prod
+            replicaCount: 3
+  template:
+    metadata:
+      name: 'my-helm-app-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/my-org/my-helm-repo
+        targetRevision: main
+        chart: my-chart
+        helm:
+          valuesObject:
+            environment: '{{env}}'
+            replicaCount: '{{replicaCount}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

@@ -1,0 +1,10 @@
+install kubeflow - workaround annotation too long issue by --server-side
+
+kustomize build . | kubectl apply --server-side -f -
+check storageclass - some pods rely on it
+
+kubectl get pods -n kubeflow
+
+kubectl logs <pod> -n <namespace>
+
+kubectl port-forward svc/istio-ingressgateway -n istio-system 8080:80

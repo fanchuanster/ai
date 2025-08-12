@@ -1,0 +1,14 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true" # Make it default
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  type: gp3
+  fsType: ext4
+  iops: "3000"        # Default IOPS, Fixed 3,000 IOPS baseline, independent of size, Max IOPS 16000
+  throughput: "125"  # MiB/s - Up to 1,000 MiB/s, configurable separately
+reclaimPolicy: Delete

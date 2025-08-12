@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namePrefix: prod-
+namespace: prod-namespace
+
+resources:
+  - ../../base
+
+patchesStrategicMerge:
+  - image-patch.yaml
+
+commonLabels:
+  environment: production
+
+
+# If you want to customize values, you need to re-define helmCharts block here.
+# as strategic merge does not merge across kustomization and helm Charts
+# helmCharts:
+#   - name: my-chart
+#     repo: https://charts.example.com
+#     version: 1.2.3
+#     releaseName: my-app
+#     namespace: prod-namespace
+#     valuesInline:
+#       replicaCount: 5
+#       resources:
+#         limits:
+#           cpu: 1000m
+#           memory: 1024Mi

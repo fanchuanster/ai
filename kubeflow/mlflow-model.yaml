@@ -1,0 +1,19 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: mlflow-model
+  namespace: default
+spec:
+  predictor:
+    model:
+      modelFormat:
+        name: mlflow
+      protocolVersion: v2  # Use V2 for MLflow compatibility
+      storageUri: "s3://hotfixes15/tmp/model"
+      resources:  # Optional: Customize resources
+        limits:
+          cpu: "1"
+          memory: 2Gi
+        requests:
+          cpu: 100m
+          memory: 1Gi
