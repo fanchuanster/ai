@@ -2,6 +2,8 @@
 #   -n alloy --create-namespace \
 #   -f alloy-values.yaml
 
+# grok3 prevails than chatgpt premium
+
 alloy:
   mounts:
     varlog: false  # Not needed for API-based collection
