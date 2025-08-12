@@ -30,8 +30,7 @@ data:
     server:
       http_listen_port: 3200
 
-    search:
-      enabled: true
+    search_enabled: true
 
     distributor:
       receivers:
