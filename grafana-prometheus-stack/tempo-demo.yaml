@@ -19,112 +19,48 @@ spec:
       storage: 10Gi
   storageClassName: gp3
 ---
-# 2) Tempo Config (search enabled, fast flush, local storage)
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tempo-config
-  namespace: tracing
-data:
-  tempo.yaml: |
-    server:
-      http_listen_port: 3200
+global:
+  storage:
+    trace:
+      backend: local  # Use local PVCs instead of S3
+      local:
+        path: /var/tempo  # Storage path in container
 
-    search_enabled: true
+serviceAccount:
+  create: true
+  annotations: {}  # No IRSA needed for local storage
 
-    distributor:
-      receivers:
-        jaeger:
-          protocols:
-            thrift_compact: {}
-            thrift_http: {}
-            grpc: {}
-        otlp:
-          protocols:
-            grpc: {}
-
-    ingester:
-      trace_idle_period: 10s
-      max_block_duration: 30s
-
-    compactor:
-      compaction:
-        block_retention: 24h
-
-    storage:
-      trace:
-        backend: local
-        local:
-          path: /var/tempo
----
-# 3) Tempo Deployment (non-root, fix volume perms via initContainer)
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: tempo
-  namespace: tracing
-spec:
+distributor:
+  enabled: true
   replicas: 1
-  selector:
-    matchLabels:
-      app: tempo
-  template:
-    metadata:
-      labels:
-        app: tempo
-    spec:
-      initContainers:
-        - name: fix-permissions
-          image: busybox
-          command: ["sh", "-c", "mkdir -p /var/tempo && chown -R 10001:10001 /var/tempo"]
-          volumeMounts:
-            - name: tempo-data
-              mountPath: /var/tempo
-      containers:
-        - name: tempo
-          image: grafana/tempo:latest
-          args: ["-config.file=/etc/tempo/tempo.yaml"]
-          ports:
-            - containerPort: 3200   # HTTP API
-            - containerPort: 6831   # Jaeger UDP (thrift_compact)
-              protocol: UDP
-            - containerPort: 14268  # Jaeger HTTP
-            - containerPort: 4317   # OTLP gRPC
-          volumeMounts:
-            - name: tempo-config
-              mountPath: /etc/tempo
-            - name: tempo-data
-              mountPath: /var/tempo
-      volumes:
-        - name: tempo-config
-          configMap:
-            name: tempo-config
-        - name: tempo-data
-          persistentVolumeClaim:
-            claimName: tempo-data
----
-# 4) Tempo Service (expose Jaeger UDP, Jaeger HTTP, OTLP, and HTTP API)
-apiVersion: v1
-kind: Service
-metadata:
-  name: tempo
-  namespace: tracing
-spec:
-  selector:
-    app: tempo
-  ports:
-    - name: http
-      port: 3200
-      protocol: TCP
-    - name: jaeger-thrift
-      port: 6831
-      protocol: UDP
-    - name: jaeger-http
-      port: 14268
-      protocol: TCP
-    - name: otlp-grpc
-      port: 4317
-      protocol: TCP
+
+ingester:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: gp3  # Use gp3 StorageClass
+    size: 10Gi  # Adjust as needed
+
+querier:
+  enabled: true
+  replicas: 1
+
+compactor:
+  enabled: true
+  replicas: 1
+  persistence:
+    enabled: true
+    storageClass: gp3
+    size: 10Gi
+
+gateway:
+  enabled: true  # For HTTP access, similar to Loki setup
+
+traces:
+  otlp:
+    grpc: true  # HotROD uses OTLP/gRPC
+    http: true  # Optional for flexibility
 ---
 # 5) HotROD demo app (send traces to Tempo over Jaeger HTTP)
 apiVersion: apps/v1
