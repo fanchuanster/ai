@@ -99,12 +99,18 @@ metadata:
   namespace: tracing
 spec:
   ports:
-    - port: 3200
-      name: http
-    - port: 6831
-      name: jaeger-thrift
-    - port: 4317
-      name: otlp-grpc
+  - name: jaeger-thrift
+    port: 6831
+    protocol: UDP
+  - name: jaeger-http
+    port: 14268
+    protocol: TCP
+  - name: otlp-grpc
+    port: 4317
+    protocol: TCP
+  - name: http
+    port: 3200
+    protocol: TCP
   selector:
     app: tempo
 ---
