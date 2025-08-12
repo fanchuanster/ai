@@ -80,7 +80,7 @@ spec:
               mountPath: /var/tempo
       containers:
         - name: tempo
-          image: grafana/tempo:2.8.2
+          image: grafana/tempo:latest
           args: ["-config.file=/etc/tempo/tempo.yaml"]
           ports:
             - containerPort: 3200   # HTTP API
