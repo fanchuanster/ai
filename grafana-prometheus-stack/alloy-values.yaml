@@ -1,27 +1,53 @@
 # helm upgrade --install alloy grafana/alloy \
 #   -n alloy --create-namespace \
 #   -f alloy-values.yaml
+# helm upgrade --install alloy grafana/alloy \
+#   -n alloy --create-namespace \
+#   -f alloy-values.yaml
 
 alloy:
   mounts:
-    varlog: true
-    dockercontainers: true
+    varlog: false  # Not needed for API-based collection
+    dockercontainers: false
 
   configMap:
     create: true
     content: |
+      // Discover Kubernetes pods
       discovery.kubernetes "pods" {
         role = "pod"
       }
 
-      local.file_match "k8s_logs" {
-        path_targets = [
-          { __path__ = "/var/log/containers/*.log", job = "kubernetes-pods" },
-        ]
+      // Relabel to add metadata
+      discovery.relabel "pod_logs" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label = "app"
+        }
+        rule {
+          action = "replace"
+          source_labels = [""]
+          target_label = "job"
+          replacement = "kubernetes-pods"
+        }
       }
 
-      loki.source.file "k8s_logs" {
-        targets    = local.file_match.k8s_logs.targets
+      // Tail logs via Kubernetes API
+      loki.source.kubernetes "k8s_logs" {
+        targets    = discovery.relabel.pod_logs.output
         forward_to = [loki.write.default.receiver]
       }
 
@@ -30,3 +56,16 @@ alloy:
           url = "http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push"
         }
       }
+
+  # Optional: Switch to Deployment (single instance)
+  controller:
+    kind: Deployment
+    replicas: 1
+
+  # RBAC for pod logs access
+  extraRBAC:
+    create: true
+    rules:
+    - apiGroups: [""]
+      resources: ["pods", "pods/log"]
+      verbs: ["get", "list", "watch"]
