@@ -19,48 +19,7 @@ spec:
       storage: 10Gi
   storageClassName: gp3
 ---
-global:
-  storage:
-    trace:
-      backend: local  # Use local PVCs instead of S3
-      local:
-        path: /var/tempo  # Storage path in container
 
-serviceAccount:
-  create: true
-  annotations: {}  # No IRSA needed for local storage
-
-distributor:
-  enabled: true
-  replicas: 1
-
-ingester:
-  enabled: true
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: gp3  # Use gp3 StorageClass
-    size: 10Gi  # Adjust as needed
-
-querier:
-  enabled: true
-  replicas: 1
-
-compactor:
-  enabled: true
-  replicas: 1
-  persistence:
-    enabled: true
-    storageClass: gp3
-    size: 10Gi
-
-gateway:
-  enabled: true  # For HTTP access, similar to Loki setup
-
-traces:
-  otlp:
-    grpc: true  # HotROD uses OTLP/gRPC
-    http: true  # Optional for flexibility
 ---
 # 5) HotROD demo app (send traces to Tempo over Jaeger HTTP)
 apiVersion: apps/v1
