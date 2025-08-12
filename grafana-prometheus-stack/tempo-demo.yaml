@@ -29,7 +29,6 @@ spec:
       labels:
         app: tempo
     spec:
-      containers:
       initContainers:
       - name: fix-permissions
         image: busybox
@@ -38,6 +37,7 @@ spec:
           - name: tempo-data
             mountPath: /var/tempo
             
+      containers:
       - name: tempo
         image: grafana/tempo:latest
         args:
