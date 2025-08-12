@@ -1,3 +1,5 @@
+---
+# 1. PVC for Tempo data (EBS-backed)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -9,4 +11,133 @@ spec:
   resources:
     requests:
       storage: 10Gi
-  storageClassName: gp3 # or gp3
+  storageClassName: gp3
+  
+# 2. Tempo Deployment (single pod, local/EBS storage)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tempo
+  namespace: tracing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tempo
+  template:
+    metadata:
+      labels:
+        app: tempo
+    spec:
+      containers:
+      - name: tempo
+        image: grafana/tempo:latest
+        args:
+          - "-config.file=/etc/tempo/tempo.yaml"
+        ports:
+          - containerPort: 3200  # Tempo HTTP API
+          - containerPort: 6831  # Jaeger Thrift Compact
+          - containerPort: 4317  # OTLP gRPC
+        volumeMounts:
+          - name: tempo-config
+            mountPath: /etc/tempo
+          - name: tempo-data
+            mountPath: /var/tempo
+      volumes:
+        - name: tempo-config
+          configMap:
+            name: tempo-config
+        - name: tempo-data
+          persistentVolumeClaim:
+            claimName: tempo-data
+---
+# 3. Tempo ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tempo-config
+  namespace: tracing
+data:
+  tempo.yaml: |
+    server:
+      http_listen_port: 3200
+    distributor:
+      receivers:
+        jaeger:
+          protocols:
+            thrift_compact:
+            thrift_http:
+            grpc:
+        otlp:
+          protocols:
+            grpc:
+    ingester:
+      trace_idle_period: 10s
+      max_block_duration: 5m
+    compactor:
+      compaction:
+        block_retention: 24h
+    storage:
+      trace:
+        backend: local
+        local:
+          path: /var/tempo
+---
+# 4. Tempo Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: tempo
+  namespace: tracing
+spec:
+  ports:
+    - port: 3200
+      name: http
+    - port: 6831
+      name: jaeger-thrift
+    - port: 4317
+      name: otlp-grpc
+  selector:
+    app: tempo
+---
+# 5. HotROD Demo App (Jaeger example app)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotrod
+  namespace: tracing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hotrod
+  template:
+    metadata:
+      labels:
+        app: hotrod
+    spec:
+      containers:
+      - name: hotrod
+        image: jaegertracing/example-hotrod:latest
+        env:
+          - name: JAEGER_AGENT_HOST
+            value: tempo
+          - name: JAEGER_AGENT_PORT
+            value: "6831"
+        ports:
+          - containerPort: 8080
+---
+# 6. HotROD Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotrod
+  namespace: tracing
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 32080
+  selector:
+    app: hotrod
