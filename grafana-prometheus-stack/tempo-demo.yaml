@@ -89,6 +89,7 @@ spec:
               protocol: UDP
             - containerPort: 14268  # Jaeger HTTP
             - containerPort: 4317   # OTLP gRPC
+            - containerPort: 4318   # OTLP HTTP   <-- ADDED THIS
           volumeMounts:
             - name: tempo-config
               mountPath: /etc/tempo
