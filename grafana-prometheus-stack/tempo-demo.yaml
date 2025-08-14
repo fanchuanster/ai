@@ -152,18 +152,18 @@ spec:
             - name: OTEL_TRACES_EXPORTER
               value: "otlp"
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
-              value: "grpc"
+              value: "http/protobuf" # grpc, http/protobuf, or http/json
             # Use generic endpoint (read by most SDKs) AND traces-specific, both with scheme
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://tempo.tracing.svc.cluster.local:4317"
-            - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
-              value: "grpc"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "http://tempo.tracing.svc.cluster.local:4317"
+              value: "http://tempo.tracing.svc.cluster.local:4318"
+            # - name: OTEL_EXPORTER_OTLP_TRACES_PROTOCOL
+            #   value: "grpc"
+            # - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+            #   value: "http://tempo.tracing.svc.cluster.local:4317"
             - name: OTEL_EXPORTER_OTLP_INSECURE
               value: "true"
-            - name: OTEL_EXPORTER_OTLP_TRACES_INSECURE
-              value: "true"
+            # - name: OTEL_EXPORTER_OTLP_TRACES_INSECURE
+            #   value: "true"
 
             # Do NOT set OTEL_SERVICE_NAME for HotROD; it already emits multiple service names.
             # If you previously set it, blank it out:
