@@ -1,4 +1,6 @@
 kubectl port-forward svc/grafana -n monitoring --address 0.0.0.0 5010:80
+kubectl port-forward svc/hotrod -n tracing --address 0.0.0.0 5011:8080
+
 
 
 [ec2-user@alm-eks-eu-central-1 ~]$ sudo ls /var/log/containers

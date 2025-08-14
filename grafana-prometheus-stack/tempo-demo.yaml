@@ -40,6 +40,7 @@ data:
         otlp:
           protocols:
             grpc: {}
+            http: {}
 
     ingester:
       trace_idle_period: 10s
@@ -122,6 +123,9 @@ spec:
       protocol: TCP
     - name: otlp-grpc
       port: 4317
+      protocol: TCP
+    - name: otlp-http
+      port: 4318
       protocol: TCP
 ---
 # 5) HotROD demo app (send traces to Tempo over Jaeger HTTP)
