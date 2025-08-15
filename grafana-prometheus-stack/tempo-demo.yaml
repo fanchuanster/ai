@@ -128,6 +128,7 @@ spec:
       protocol: TCP
     - name: otlp-http
       port: 4318
+      targetPort: 4318
       protocol: TCP
 ---
 # 5) HotROD demo app (send traces to Tempo over Jaeger HTTP)
