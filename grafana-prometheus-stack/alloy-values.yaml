@@ -1,7 +1,7 @@
 # helm upgrade --install alloy grafana/alloy -n alloy --create-namespace -f alloy-values.yaml
 
 controller:
-  type: Deployment
+  type: deployment
   replicas: 1
 
 extraRBAC:
