@@ -14,15 +14,16 @@ rbac:
 #       resources: ["pods", "pods/log", "namespaces"]
 #       verbs: ["get", "list", "watch"]
 
-service:
-  enabled: true
-  ports:
-    - name: otlp-grpc
-      port: 4317
-      targetPort: 4317
-    - name: otlp-http
-      port: 4318
-      targetPort: 4318
+# traces
+# service:
+#   enabled: true
+#   ports:
+#     - name: otlp-grpc
+#       port: 4317
+#       targetPort: 4317
+#     - name: otlp-http
+#       port: 4318
+#       targetPort: 4318
 
 alloy:
   mounts:
