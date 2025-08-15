@@ -64,9 +64,28 @@ alloy:
         }
       }
 
-      // Tail logs via Kubernetes API
+      // Tail logs via Kubernetes API. input and receiver are slightly different and here interchangable.
       loki.source.kubernetes "k8s_logs" {
         targets    = discovery.relabel.pod_logs.output
+        forward_to = [loki.process.pipeline.input]
+      }
+
+       // NEW: parse JSON, pick labels, and make sure trace_id/span_id are NOT labels
+      loki.process "pipeline" {
+        stage.json {}
+
+        stage.labels {
+          values = {
+            "namespace" = "namespace",
+            "pod"       = "pod",
+            "container" = "container",
+            "app"       = "app"
+          }
+        }
+
+        // keep Loki index lean; trace_id/span_id stay only in the line (JSON)
+        stage.labeldrop { values = ["trace_id", "span_id"] }
+
         forward_to = [loki.write.default.receiver]
       }
 
