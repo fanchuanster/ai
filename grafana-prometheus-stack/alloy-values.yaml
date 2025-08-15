@@ -4,12 +4,25 @@ controller:
   type: deployment
   replicas: 1
 
-extraRBAC:
+rbac:
   create: true
-  rules:
-    - apiGroups: [""]
-      resources: ["pods", "pods/log"]
-      verbs: ["get", "list", "watch"]
+
+# extraRBAC:
+#   create: true
+#   rules:
+#     - apiGroups: [""]
+#       resources: ["pods", "pods/log", "namespaces"]
+#       verbs: ["get", "list", "watch"]
+
+service:
+  enabled: true
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
 
 alloy:
   mounts:
