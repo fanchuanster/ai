@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: telemetrygen
+  namespace: otel-corr-demo
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: telemetrygen
+          # image: ghcr.io/open-telemetry/telemetrygen:latest
+          image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:latest
+          # Generates traces + logs for a few minutes
+          args:
+            - --otlp-endpoint=otelcol.otel-corr-demo.svc.cluster.local:4317
+            - --otlp-insecure=true
+            - --service-name=demo-service
+            - --rate=2
+            - --duration=180s
+            - --traces
+            - --logs
+            - --log-body="checkout complete"
+            - --span-attributes=app=checkout,env=demo
+            - --log-attributes=level=info,component=worker
